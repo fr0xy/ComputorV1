@@ -4,25 +4,22 @@ import my_math
 
 
 def splitPlusMinus(equation):
-    index = equation.find("*X^")
-    preIndex = -4
     polynome = [0] * 1024
+    index = 0
     while (index != -1):
-        lowestIndex = -1
-        endOfPowerPlus = equation[index:len(equation)].find("+")
-        if (endOfPowerPlus != -1):
-            lowestIndex = endOfPowerPlus
-        endOfPowerMinus = equation[index:len(equation)].find("-")
-        if ((endOfPowerMinus != -1 and lowestIndex == -1) or (endOfPowerMinus != -1 and endOfPowerMinus < lowestIndex)):
-            lowestIndex = endOfPowerMinus
-        endOfPowerEqual = equation[index:len(equation)].find("=")
-        if ((endOfPowerEqual != -1 and lowestIndex == -1) or (endOfPowerEqual != -1 and endOfPowerEqual < lowestIndex)):
-            lowestIndex = endOfPowerEqual
-        if (lowestIndex == -1):
+        powerIndex = equation.find("*X^", index)
+        if (powerIndex == -1):
+            return polynome
+        nb = float(equation[index:powerIndex])
+        lowestIndexList = [equation[powerIndex:len(equation)].find(char) for char in ["+", "-"]]
+        lowestIndexList = [a for a in lowestIndexList if a != -1]
+        if (len(lowestIndexList) != 0):
+            lowestIndex = min(lowestIndexList) + powerIndex
+        else:
             lowestIndex = len(equation)
-        polynome[int(equation[index + 3:index + lowestIndex])] = polynome[int(equation[index + 3:index + lowestIndex])] + (float(equation[preIndex+4:index]))
-        preIndex = index
-        index = equation.find("*X^", index + 3)
+        power = int(equation[powerIndex + 3:lowestIndex])
+        polynome[power] += nb
+        index = lowestIndex
     return polynome
 
 def simplify(polynomes):
@@ -69,7 +66,7 @@ def display(polynomes):
         i = 1023
         while i >= 0:
             if (polynomes[y][i] != 0):
-                if (i != 2 and flagFirst == False):
+                if (flagFirst == False):
                     displayForm += " + "
                 displayForm = displayForm + str(polynomes[y][i]) + " * X^" + str(i)
                 flagFirst = False
@@ -118,6 +115,7 @@ def solveNegative(polynomes, discriminent):
 def main():
     if len(sys.argv) != 2:
         print("Error")
+        return
     arg = sys.argv[1]
     arg = arg.replace(' ', '')
     equations = arg.split('=')
